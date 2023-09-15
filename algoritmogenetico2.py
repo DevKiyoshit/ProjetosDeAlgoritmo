@@ -52,8 +52,9 @@ class geração:
     def criarGeração(tamanho_da_população):
         população = []
         for i in range(tamanho_da_população):
-            ind = individuo(gene.DNAgen(itens),i)
-            população.append(ind)
+            indiv = individuo(gene.DNAgen(itens),i)
+            população.append(indiv)
+        individuos = população
         return população
 
 #define uma cadeia booleana para representar os genes presentes em cada individuo
@@ -65,6 +66,7 @@ class gene:
         self.DNA = DNA
         
     def DNAgen(RNA):
+        #o RNA é a lista de itens
         #tamanho da cadeia:
         RNAtamanho = len(RNA)
         #cada valor de dentro da cadeia do RNA será chamada de base, em referência às bases nitrogenadas da biologia
@@ -77,10 +79,35 @@ class gene:
             cadeia_de_RNA.append(random.choice(base))
         return cadeia_de_RNA
 
+#define a fitness function, ela julgará cada indivíduo
+#receberá o valor de cada base e a lista de itens
+#percorrerá a lista de RNA e se for verdadeiro, somará à variável de utilidade total e espaço total
+#encontrará na lista de itens os valores de utilidade e espaço
+#verificará se o valor de espaços é maior do que os espaços da mochila
+#se o valor de espaços for maior do que a da mochila, receberá o valor 0
+# o valor ideal será o com utilidade somada mais alta. Em resumo, o mais fitness será o com mais utilidade
+
+def fitness(DNA, itens, mochila):
+    utilidadeTotal = 0
+    espaçoTotal = 0
+    for indice, i in enumerate(DNA, start=0):
+        if i == 1:
+            utilidadeTotal += itens[indice].utilidade
+            espaçoTotal += itens[indice].espaço
+    if espaçoTotal > mochila.espaços:
+        utilidadeTotal = 0
+    return utilidadeTotal
+
+#seleção
+#a seleção residirá sobre uma geração
+#pegará a lista da população
+#sorteará e classificará os melhores
+#aplicará um critério de seleção informado (x para os top x da lista)
+
+
 #variáveis:
 pop = 100
-ind = individuo(gene.DNAgen(itens),1)
 umageração = geração.criarGeração(pop)
-print(ind.geneindividual) 
-for ind in umageração:
-    print(f"individuo {ind.id}: {ind.geneindividual}")
+for i in umageração:
+    print(f"individuo {i.id}: {i.geneindividual} possui {fitness(i.geneindividual, itens, minhaBolsa)} de aptidão")
+
