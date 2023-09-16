@@ -29,7 +29,30 @@ itens =[
     #pode ser interessante aumentar o valor de utilidade como conjunto caso lápis e caneta estejam juntos
     #porém, esse seria outro desafio de código para ser implementado no futuro
     Item("caderno", "escrever ou ler", 1000, 150 ),
-    Item("caneta", "escrever", 5, 5 )
+    Item("caneta", "escrever", 5, 5 ),
+    Item("óculos de sol", "proteger os olhos do sol", 70, 10),
+    Item("garrafa de água", "hidratação", 30, 20),
+    Item("laptop", "computação móvel", 1800, 250),
+    Item("chave de fenda", "ferramenta para parafusos", 10, 5),
+    Item("protetor solar", "proteger a pele do sol", 25, 15),
+    Item("guarda-chuva", "proteção contra chuva", 40, 30),
+    Item("câmera", "capturar momentos", 800, 120),
+    Item("fones de ouvido sem fio", "ouvir música sem fio", 200, 40),
+    Item("tênis de corrida", "para atividade física", 100, 60),
+    Item("tênis de basquete", "para jogar basquete", 120, 80),
+    Item("chaveiro", "organizar chaves", 5, 5),
+    Item("protetor labial", "proteger os lábios", 8, 3),
+    Item("carregador de celular", "manter o celular carregado", 15, 10),
+    Item("guarda-roupa", "guardar roupas", 350, 150),
+    Item("adesivos", "diversão decorativa", 2, 2),
+    Item("notebook pequeno", "computação portátil", 800, 120),
+    Item("livro", "leitura para o lazer", 50, 30),
+    Item("escova de dentes", "higiene bucal", 10, 5),
+    Item("pasta de dente", "para escovação", 8, 5),
+    Item("saco de dormir", "para acampamento", 200, 150),
+    Item("lanterna", "iluminação portátil", 25, 15),
+    Item("kit de primeiros socorros", "para emergências", 50, 30)
+    
 ]
 
 #um indivíduo da população é a lista completa de itens com os genes ativos ou desativados um indivíduo representa
@@ -54,7 +77,6 @@ class geração:
         for i in range(tamanho_da_população):
             indiv = individuo(gene.DNAgen(itens),i)
             população.append(indiv)
-        individuos = população
         return população
 
 #define uma cadeia booleana para representar os genes presentes em cada individuo
@@ -101,13 +123,64 @@ def fitness(DNA, itens, mochila):
 #seleção
 #a seleção residirá sobre uma geração
 #pegará a lista da população
+#atribuirá a fitness function em cada indivíduo da população
+#resultará numa lista dentro da lista contendo dois valores: quoeficientefitness e o indivíduo
 #sorteará e classificará os melhores
 #aplicará um critério de seleção informado (x para os top x da lista)
+def seleção(população, top):
+    rankeamento_da_população = []
+    for i in população:
+        rankeamento_da_população.append([fitness(i.geneindividual, itens, minhaBolsa), i.id, i.geneindividual])
+    rankeamento_da_população.sort()
+    rankeamento_da_população.reverse()
+    melhores_individuos = []
+    for s in range(top):
+        melhores_individuos.append(rankeamento_da_população[s])
+    return melhores_individuos
+
+#cruzamento
+#pegará uma lista de indivíduos (idealmente a lista dos mais selcionados, mas não necessariamente)
+#selecionará um indivíduo aleatório para dar match com outro indivíduo aleatório
+#para isso, escolherá aleatoraimente algum indivíduo da lista, depois escolherá algum valor aleatório menor do que a lista para acasalar
+#dividirá na metade o gene do indivíduo e somará com a outra metade do segundo indivíduo da lista
+def cruzamento(amantes):
+    ninhada = []
+    copuladores = amantes.copy()
+    while len(copuladores) >= 2:
+        amante1 = random.choice(copuladores)
+        copuladores.remove(amante1)
+
+        amante2 = random.choice(copuladores)
+        copuladores.remove(amante2)
+        #chamarei de gameta a metade da lista de um amante
+
+        metade_amante1 = len(amante1[2])//2
+        metade_amante2 = len(amante2[2])//2
+
+        gameta1 = amante1[2][:metade_amante1]
+        gameta2 = amante2[2][:metade_amante2]
+
+        filho = gameta1+gameta2 
+        ninhada.append(filho)
+    if len(copuladores) >= 1:
+        ninhada.append(copuladores[0][2])
+    return print(ninhada)
+
+#mutação
+#recebe uma lista de indivíduos
+#recebe a probabilidade de mutação
+#se numa rolagem aleatória o valor for maior do que a probabilidade de mutação,  a  mutação ocorre, caso o contrário, segue
+#seleciona um valor aleatório do DNA e troca pelo seu inverso se 0, logo 1; se 1, logo 0
 
 
 #variáveis:
-pop = 100
+top = 40
+pop = 200
 umageração = geração.criarGeração(pop)
-for i in umageração:
-    print(f"individuo {i.id}: {i.geneindividual} possui {fitness(i.geneindividual, itens, minhaBolsa)} de aptidão")
+#for i in umageração:
+#    print(f"individuo {i.id}: {i.geneindividual} possui {fitness(i.geneindividual, itens, minhaBolsa)} de aptidão")
+
+ranked = seleção(umageração,top)
+cruzamento(ranked)
+
 
