@@ -167,20 +167,33 @@ def cruzamento(amantes):
     return print(ninhada)
 
 #mutação
-#recebe uma lista de indivíduos
+#recebe um indivíduo
 #recebe a probabilidade de mutação
 #se numa rolagem aleatória o valor for maior do que a probabilidade de mutação,  a  mutação ocorre, caso o contrário, segue
 #seleciona um valor aleatório do DNA e troca pelo seu inverso se 0, logo 1; se 1, logo 0
+def mutação(individuo, taxa_de_mutação):
+    prob = random.uniform(0,100)/100
+    if prob < taxa_de_mutação:
+        tamanho_gene = len(individuo.geneindividual) 
+        gene_alterado = random.randint(0, tamanho_gene - 1)
+        if individuo.geneindividual[gene_alterado] == 1:
+            individuo.geneindividual[gene_alterado] = 0
+        else: 
+            individuo.geneindividual[gene_alterado] = 1
+
+
 
 
 #variáveis:
-top = 40
+top = 3
 pop = 200
+taxa_de_mutação = 60
 umageração = geração.criarGeração(pop)
+individuo_teste = individuo(gene.DNAgen(itens), 1)
 #for i in umageração:
 #    print(f"individuo {i.id}: {i.geneindividual} possui {fitness(i.geneindividual, itens, minhaBolsa)} de aptidão")
 
 ranked = seleção(umageração,top)
-cruzamento(ranked)
+#cruzamento(ranked)
 
 
