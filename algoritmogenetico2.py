@@ -70,7 +70,7 @@ class geração:
     def __init__(self, individuos, id):
         self.individuos = individuos
         self.id = id
-    #aqui será criado uma função de geração de população com o tamanho a ser especificado, recebendo os valores de 
+    #aqui será criado uma função de geração de população com o tamanho a ser especificado, recebendo
     # indivíduos em uma lista
     def criarGeração(tamanho_da_população):
         população = []
@@ -101,7 +101,7 @@ class gene:
             cadeia_de_RNA.append(random.choice(base))
         return cadeia_de_RNA
 
-#define a fitness function, ela julgará cada indivíduo
+#define a fitness function, ela julgará cada objeto indivíduo
 #receberá o valor de cada base e a lista de itens
 #percorrerá a lista de RNA e se for verdadeiro, somará à variável de utilidade total e espaço total
 #encontrará na lista de itens os valores de utilidade e espaço
@@ -109,9 +109,10 @@ class gene:
 #se o valor de espaços for maior do que a da mochila, receberá o valor 0
 # o valor ideal será o com utilidade somada mais alta. Em resumo, o mais fitness será o com mais utilidade
 
-def fitness(DNA, itens, mochila):
+def fitness(individuo, itens, mochila):
     utilidadeTotal = 0
     espaçoTotal = 0
+    DNA = individuo.geneindividual
     for indice, i in enumerate(DNA, start=0):
         if i == 1:
             utilidadeTotal += itens[indice].utilidade
@@ -130,19 +131,20 @@ def fitness(DNA, itens, mochila):
 def seleção(população, top):
     rankeamento_da_população = []
     for i in população:
-        rankeamento_da_população.append([fitness(i.geneindividual, itens, minhaBolsa), i.id, i.geneindividual])
-    rankeamento_da_população.sort()
-    rankeamento_da_população.reverse()
+        rankeamento_da_população.append({'fitness':fitness(i, itens, minhaBolsa),'individuo':i})
+    rankeamento_da_população = sorted(rankeamento_da_população, key=lambda x: x['fitness'], reverse=True)
     melhores_individuos = []
     for s in range(top):
-        melhores_individuos.append(rankeamento_da_população[s])
+        melhores_individuos.append(rankeamento_da_população[s]['individuo'])
+    #precisa retornar objetoindivíduos
     return melhores_individuos
 
 #cruzamento
-#pegará uma lista de indivíduos (idealmente a lista dos mais selcionados, mas não necessariamente)
+#pegará uma lista de objeto indivíduos (idealmente a lista dos mais selcionados, mas não necessariamente)
 #selecionará um indivíduo aleatório para dar match com outro indivíduo aleatório
 #para isso, escolherá aleatoraimente algum indivíduo da lista, depois escolherá algum valor aleatório menor do que a lista para acasalar
 #dividirá na metade o gene do indivíduo e somará com a outra metade do segundo indivíduo da lista
+#retornará uma lista de objeto individuo
 def cruzamento(amantes):
     ninhada = []
     copuladores = amantes.copy()
@@ -154,23 +156,23 @@ def cruzamento(amantes):
         copuladores.remove(amante2)
         #chamarei de gameta a metade da lista de um amante
 
-        metade_amante1 = len(amante1[2])//2
-        metade_amante2 = len(amante2[2])//2
+        metade_amante1 = len(amante1.geneindividual)//2
+        metade_amante2 = len(amante2.geneindividual)//2
 
-        gameta1 = amante1[2][:metade_amante1]
-        gameta2 = amante2[2][:metade_amante2]
+        gameta1 = amante1.geneindividual[:metade_amante1]
+        gameta2 = amante2.geneindividual[:metade_amante2]
 
         filho = gameta1+gameta2 
-        ninhada.append(filho)
+        ninhada.append(individuo(filho,len(ninhada)))
     if len(copuladores) >= 1:
-        ninhada.append(copuladores[0][2])
-    return print(ninhada)
+        ninhada.append(individuo(copuladores[0].geneindividual,len(ninhada)))
+    return ninhada
 
 #mutação
-#recebe um indivíduo
+#recebe um objeto indivíduo
 #recebe a probabilidade de mutação
 #se numa rolagem aleatória o valor for maior do que a probabilidade de mutação,  a  mutação ocorre, caso o contrário, segue
-#seleciona um valor aleatório do DNA e troca pelo seu inverso se 0, logo 1; se 1, logo 0
+#seleciona um valor aleatório do DNA e troca pelo seu inverso se 0, logo 1; se 1, logo 0 direto no atributo da classe
 def mutação(individuo, taxa_de_mutação):
     prob = random.uniform(0,100)/100
     if prob < taxa_de_mutação:
@@ -181,12 +183,18 @@ def mutação(individuo, taxa_de_mutação):
         else: 
             individuo.geneindividual[gene_alterado] = 1
 
-
-
+#loop de gerações
+#recebe quantas gerações serão geradas e a população inicial num objeto.geração para receber o id
+def loopgen(população_inicial, loop):
+    população = população_inicial
+    for i in range(loop):
+        população.append(população_inicial)
+    return print(população)
 
 #variáveis:
-top = 3
-pop = 200
+top = 2
+pop = 3000
+loop = 2
 taxa_de_mutação = 60
 umageração = geração.criarGeração(pop)
 individuo_teste = individuo(gene.DNAgen(itens), 1)
@@ -194,6 +202,5 @@ individuo_teste = individuo(gene.DNAgen(itens), 1)
 #    print(f"individuo {i.id}: {i.geneindividual} possui {fitness(i.geneindividual, itens, minhaBolsa)} de aptidão")
 
 ranked = seleção(umageração,top)
-#cruzamento(ranked)
-
-
+filhos = cruzamento(ranked)
+loopgen(filhos, loop)
