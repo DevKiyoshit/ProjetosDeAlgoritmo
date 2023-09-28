@@ -1,4 +1,5 @@
 import random
+import copy
 #preciso saber quantos itens cabem na bolsa de forma a descobrir a melhor utilidade
 #a bolsa cabe x espaços
 #cada item tem Descrição, utilidade e espaço
@@ -174,33 +175,53 @@ def cruzamento(amantes):
 #se numa rolagem aleatória o valor for maior do que a probabilidade de mutação,  a  mutação ocorre, caso o contrário, segue
 #seleciona um valor aleatório do DNA e troca pelo seu inverso se 0, logo 1; se 1, logo 0 direto no atributo da classe
 def mutação(individuo, taxa_de_mutação):
-    prob = random.uniform(0,100)/100
+    prob = random.uniform(0,100)
     if prob < taxa_de_mutação:
         tamanho_gene = len(individuo.geneindividual) 
-        gene_alterado = random.randint(0, tamanho_gene - 1)
-        if individuo.geneindividual[gene_alterado] == 1:
-            individuo.geneindividual[gene_alterado] = 0
+        alelo_alterado = random.randint(0, tamanho_gene - 1)
+        gene_mutado = individuo.geneindividual[:]
+        if gene_mutado[alelo_alterado] == 1:
+            gene_mutado[alelo_alterado] = 0
         else: 
-            individuo.geneindividual[gene_alterado] = 1
+            gene_mutado[alelo_alterado] = 1
+        individuo.geneindividual = gene_mutado
 
 #loop de gerações
 #recebe quantas gerações serão geradas e a população inicial num objeto.geração para receber o id
-def loopgen(população_inicial, loop):
-    população = população_inicial
+#cria um adiciona todos os indivíduos da lista de população inicial à lista de população num loop while até que
+#o tamanho da lista seja maior do que a população
+#todos os indivíduos adicionados para a lista de população sofrerão mutação 
+def loopgen(população_inicial, loop, pop):
+    população = []
+    lista_de_gerações = []
+    #gera a primeira geração do loop
     for i in range(loop):
-        população.append(população_inicial)
-    return print(população)
+        essa_geração = geração(população_inicial, i)
+        while len(população) < pop:
+            for i in população_inicial:
+                
+                filho_copiado = copy.copy(i)
+                filho_copiado.id = len(população)
+                mutação(filho_copiado, taxa_de_mutação)
+    #aplica a função mutação em cada indivíduo da lista
+                população.append(filho_copiado)
+        população_inicial = população
+        lista_de_gerações.append(essa_geração)
+    return lista_de_gerações[-1]
 
 #variáveis:
-top = 2
-pop = 3000
-loop = 2
-taxa_de_mutação = 60
+top = 1000
+pop = 10000
+loop = 7000
+taxa_de_mutação = 80
 umageração = geração.criarGeração(pop)
 individuo_teste = individuo(gene.DNAgen(itens), 1)
 #for i in umageração:
 #    print(f"individuo {i.id}: {i.geneindividual} possui {fitness(i.geneindividual, itens, minhaBolsa)} de aptidão")
-
 ranked = seleção(umageração,top)
-filhos = cruzamento(ranked)
-loopgen(filhos, loop)
+loopresultado = loopgen(cruzamento(ranked), loop, pop)
+ranked = seleção(loopresultado.individuos,5)
+for i in ranked:
+    print(f'id: {i.id} fitness: {fitness(i, itens, minhaBolsa)}, ')
+
+#visualizar os melhores de cada geração
